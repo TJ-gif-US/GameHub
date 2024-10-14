@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rock Paper Scissors vs AI</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #121212;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .game-container {
+            background-color: #1c1c1c;
+            padding: 30px;
+            border-radius: 16px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: #ff9800;
+        }
+
+        .choices {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .choice {
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            font-size: 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .choice:hover {
+            background-color: #ff9800;
+        }
+
+        .result {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #ff9800;
+        }
+
+        .score {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background-color: #ff9800;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <h1>Rock Paper Scissors</h1>
+        <div class="choices">
+            <div class="choice" data-choice="rock">✊ Rock</div>
+            <div class="choice" data-choice="paper">✋ Paper</div>
+            <div class="choice" data-choice="scissors">✌ Scissors</div>
+        </div>
+        <div class="result" id="result"></div>
+        <div class="score" id="score">Player: 0 | AI: 0</div>
+        
+        <button class="back-btn" onclick="resetGame()">Play Again</button>
+        <a href="index.html">
+            <button class="back-btn">Back</button>
+        </a>
+        
+    </div>
+
+    <script>
+        const choices = document.querySelectorAll('.choice');
+        const resultDiv = document.getElementById('result');
+        const scoreDiv = document.getElementById('score');
+        const choicesArray = ['rock', 'paper', 'scissors'];
+        let playerScore = 0;
+        let aiScore = 0;
+
+        // Add event listeners to the choices
+        choices.forEach(choice => choice.addEventListener('click', playerTurn));
+
+        // Handle player's turn
+        function playerTurn(e) {
+            const playerChoice = e.target.getAttribute('data-choice');
+            const aiChoice = getAIChoice();
+            const winner = determineWinner(playerChoice, aiChoice);
+            displayResult(playerChoice, aiChoice, winner);
+        }
+
+        // Generate AI's choice randomly
+        function getAIChoice() {
+            const randomIndex = Math.floor(Math.random() * choicesArray.length);
+            return choicesArray[randomIndex];
+        }
+
+        // Determine the winner
+        function determineWinner(player, ai) {
+            if (player === ai) {
+                return 'tie';
+            }
+
+            if ((player === 'rock' && ai === 'scissors') ||
+                (player === 'paper' && ai === 'rock') ||
+                (player === 'scissors' && ai === 'paper')) {
+                playerScore++;
+                return 'player';
+            } else {
+                aiScore++;
+                return 'ai';
+            }
+        }
+
+        // Display the result
+        function displayResult(player, ai, winner) {
+            if (winner === 'tie') {
+                resultDiv.textContent = `It's a tie! You both chose ${player}.`;
+            } else if (winner === 'player') {
+                resultDiv.textContent = `You win! ${player} beats ${ai}.`;
+            } else {
+                resultDiv.textContent = `You lose! ${ai} beats ${player}.`;
+            }
+            updateScore();
+        }
+
+        // Update the score display
+        function updateScore() {
+            scoreDiv.textContent = `Player: ${playerScore} | AI: ${aiScore}`;
+        }
+
+        // Reset the game
+        function resetGame() {
+            playerScore = 0;
+            aiScore = 0;
+            resultDiv.textContent = '';
+            updateScore();
+        }
+    </script>
+</body>
+</html>

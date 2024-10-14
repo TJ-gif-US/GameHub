@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #121212;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .game-container {
+            background-color: #1c1c1c;
+            padding: 30px;
+            border-radius: 16px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: #ff9800;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .cell {
+            background-color: #333;
+            color: white;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 32px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        .cell:hover {
+            background-color: #ff9800;
+        }
+
+        .back-btn {
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background-color: #ff9800;
+        }
+
+        .result {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #ff9800;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <h1>Tic-Tac-Toe</h1>
+        <div class="board" id="board">
+            <!-- 9 cells for the Tic-Tac-Toe board -->
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+
+        <div class="result" id="result"></div>
+
+        <button class="back-btn" onclick="resetGame()">Play Again</button>
+        <a href="index.html">
+            <button class="back-btn">Back</button>
+        </a>
+        
+    </div>
+
+    <script>
+        const board = document.querySelectorAll('.cell');
+        let gameBoard = ['', '', '', '', '', '', '', '', ''];
+        let currentPlayer = 'X';
+        const player = 'X'; // Human
+        const ai = 'O'; // AI
+        const resultDiv = document.getElementById('result');
+
+        // Winning combinations
+        const winCombos = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6]
+        ];
+
+        // Add event listener to each cell
+        board.forEach(cell => cell.addEventListener('click', handleClick));
+
+        function handleClick(e) {
+            const index = e.target.getAttribute('data-index');
+            if (gameBoard[index] === '' && currentPlayer === player) {
+                gameBoard[index] = player;
+                e.target.textContent = player;
+                currentPlayer = ai;
+                if (!checkWin(gameBoard, player) && !checkTie()) {
+                    aiMove();
+                }
+            }
+        }
+
+        function aiMove() {
+            const bestSpot = minimax(gameBoard, ai).index;
+            gameBoard[bestSpot] = ai;
+            document.querySelector(`.cell[data-index='${bestSpot}']`).textContent = ai;
+            currentPlayer = player;
+
+            if (checkWin(gameBoard, ai)) {
+                gameOver(ai);
+            } else if (checkTie()) {
+                gameOver('tie');
+            }
+        }
+
+        // Check for a win
+        function checkWin(board, player) {
+            let plays = board.reduce((a, e, i) => (e === player) ? a.concat(i) : a, []);
+            let win = null;
+            for (let [index, winCombo] of winCombos.entries()) {
+                if (winCombo.every(elem => plays.indexOf(elem) > -1)) {
+                    win = {index: index, player: player};
+                    break;
+                }
+            }
+            return win;
+        }
+
+        // Check for a tie
+        function checkTie() {
+            if (gameBoard.every(cell => cell !== '')) {
+                gameOver('tie');
+                return true;
+            }
+            return false;
+        }
+
+        // End the game and declare the result
+        function gameOver(winner) {
+            if (winner === 'tie') {
+                resultDiv.textContent = 'It\'s a Tie!';
+            } else {
+                resultDiv.textContent = `${winner} Wins!`;
+            }
+            board.forEach(cell => cell.removeEventListener('click', handleClick)); // Stop clicks after game ends
+        }
+
+        // Reset the game
+        function resetGame() {
+            gameBoard = ['', '', '', '', '', '', '', '', ''];
+            currentPlayer = player;
+            board.forEach(cell => {
+                cell.textContent = '';
+                cell.addEventListener('click', handleClick);
+            });
+            resultDiv.textContent = '';
+        }
+
+        // Minimax Algorithm
+        function minimax(newBoard, currentPlayer) {
+            // Available spots
+            const availableSpots = newBoard.reduce((acc, cur, idx) => cur === '' ? acc.concat(idx) : acc, []);
+
+            // Check for terminal states
+            if (checkWin(newBoard, player)) {
+                return {score: -10};
+            } else if (checkWin(newBoard, ai)) {
+                return {score: 10};
+            } else if (availableSpots.length === 0) {
+                return {score: 0};
+            }
+
+            // Move evaluation
+            const moves = [];
+            for (let i = 0; i < availableSpots.length; i++) {
+                const move = {};
+                move.index = availableSpots[i];
+                newBoard[availableSpots[i]] = currentPlayer;
+
+                if (currentPlayer === ai) {
+                    const result = minimax(newBoard, player);
+                    move.score = result.score;
+                } else {
+                    const result = minimax(newBoard, ai);
+                    move.score = result.score;
+                }
+
+                newBoard[availableSpots[i]] = '';
+                moves.push(move);
+            }
+
+            // Best move
+            let bestMove;
+            if (currentPlayer === ai) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < moves.length; i++) {
+                    if (moves[i].score > bestScore) {
+                        bestScore = moves[i].score;
+                        bestMove = i;
+                    }
+                }
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < moves.length; i++) {
+                    if (moves[i].score < bestScore) {
+                        bestScore = moves[i].score;
+                        bestMove = i;
+                    }
+                }
+            }
+
+            return moves[bestMove];
+        }
+    </script>
+</body>
+</html>
