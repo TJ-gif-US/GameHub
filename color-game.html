@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Match Game</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #121212;
+            color: white;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        #targetColor {
+            width: 200px;
+            height: 200px;
+            border: 2px solid #ff9800;
+            margin-bottom: 20px;
+        }
+
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .colorTile {
+            width: 50px;
+            height: 50px;
+            border: 1px solid #fff;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .colorTile:hover {
+            transform: scale(1.1);
+        }
+
+        #score {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        #timer {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        #gameOver {
+            display: none;
+            font-size: 32px;
+            color: #ff9800;
+        }
+        .back-btn {
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            width: 50%;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background-color: #ff9800;
+        }
+    </style>
+</head>
+<body>
+
+<button class="back-btn" onclick="resetGame()">Play Again</button>
+<h1>Color Match Game</h1>
+<div id="targetColor"></div>
+<div id="grid"></div>
+<div id="score">Score: 0</div>
+<div id="timer">Time: 30</div>
+<div id="gameOver">Game Over!</div>
+
+<script>
+    const gridElement = document.getElementById('grid');
+    const targetColorElement = document.getElementById('targetColor');
+    const scoreElement = document.getElementById('score');
+    const timerElement = document.getElementById('timer');
+    const gameOverElement = document.getElementById('gameOver');
+
+    let score = 0;
+    let timeLeft = 30;
+    let gameInterval;
+    let timerInterval;
+
+    // Function to generate a random color
+    function resetGame() {
+        timeLeft = 31
+        window.onload = startGame;
+    }
+    function getRandomColor() {
+        const r = Math.floor(Math.random() * 256);
+        const g = Math.floor(Math.random() * 256);
+        const b = Math.floor(Math.random() * 256);
+        return `rgb(${r}, ${g}, ${b})`;
+    }
+
+    // Function to start the game
+    function startGame() {
+        score = 0;
+        timeLeft = 30;
+        scoreElement.textContent = 'Score: 0';
+        timerElement.textContent = 'Time: 30';
+        gameOverElement.style.display = 'none';
+        generateColors();
+        startTimer();
+    }
+
+    // Function to generate target color and grid colors
+    function generateColors() {
+        const targetColor = getRandomColor();
+        targetColorElement.style.backgroundColor = targetColor;
+
+        gridElement.innerHTML = '';
+        const colors = new Set();
+
+        // Create a set of random colors and add the target color
+        while (colors.size < 15) {
+            colors.add(getRandomColor());
+        }
+        colors.add(targetColor);
+
+        // Shuffle colors and create tiles
+        const shuffledColors = Array.from(colors).sort(() => Math.random() - 0.5);
+        shuffledColors.forEach(color => {
+            const tile = document.createElement('div');
+            tile.classList.add('colorTile');
+            tile.style.backgroundColor = color;
+            tile.addEventListener('click', () => handleTileClick(color, targetColor));
+            gridElement.appendChild(tile);
+        });
+    }
+
+    // Function to handle tile click
+    function handleTileClick(color, targetColor) {
+        if (color === targetColor) {
+            score++;
+            scoreElement.textContent = `Score: ${score}`;
+            generateColors(); // Generate new colors
+        }
+    }
+
+    // Function to start the timer
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            timerElement.textContent = `Time: ${timeLeft}`;
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }, 1000);
+    }
+
+    // Function to end the game
+    function endGame() {
+        clearInterval(timerInterval);
+        gameOverElement.style.display = 'block';
+        gridElement.innerHTML = ''; // Clear grid
+    }
+
+    // Start the game when the page loads
+    window.onload = startGame;
+
+</script>
+
+</body>
+</html>
